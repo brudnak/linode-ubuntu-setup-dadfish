@@ -27,29 +27,27 @@ else
     echo "Make is already installed."
 fi
 
-# Ensure snap is installed
-if ! command_exists snap; then
-    echo "Snap not found. Installing Snap..."
-    apt install -y snapd
-else
-    echo "Snap is already installed."
-fi
-
-# Ensure the snap binary is in PATH for this script
-export PATH=$PATH:/snap/bin
-
-# Install Go using snap
+# Install Go
 if ! command_exists go; then
     echo "Go not found. Installing Go..."
-    snap install go --classic
+
+    # Get latest Go version
+    GO_LATEST_VERSION=$(curl -s https://go.dev/VERSION\?m\=text | head -1)
+    GO_ZIP_FILE=${GO_LATEST_VERSION}.linux-amd64.tar.gz
+
+    # Download Go
+    wget https://go.dev/dl/${GO_ZIP_FILE}
+    sudo tar -C /usr/local -xvzf ${GO_ZIP_FILE}
+
+    # Create Sym Link for Go bin
+    sudo ln -sf /usr/local/go/bin/go /usr/bin/go
+
+    # Remove Go zip file
+    rm $GO_ZIP_FILE
+
 else
     echo "Go is already installed. Updating to the latest version..."
-    snap refresh go
 fi
-
-# Update PATH to include Go binaries
-echo 'export PATH=$PATH:/snap/bin:/root/go/bin' >> /etc/profile
-source /etc/profile
 
 # Verify installations
 echo "GCC version:"
